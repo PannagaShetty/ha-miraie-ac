@@ -53,6 +53,26 @@
     - use the country code for the phone number e.g. `+91XXXXXX`
 2. Submit the form.
 
+## AC timers
+
+Each AC gets the same on/off timers as the MirAIe app. They run on the AC itself, so they fire
+even if Home Assistant or the internet is down at that time, and they show up in the MirAIe app.
+
+| Entity | What it does |
+| --- | --- |
+| `time.<ac>_off_timer` | Set a time to turn the AC off then (today, or tomorrow if it has passed). Unknown when no timer is set. The `fires_at` attribute has the full date and time. |
+| `time.<ac>_on_timer` | The same for turning the AC on. |
+| `button.<ac>_cancel_off_timer` | Cancels the off timer and keeps the on timer. |
+| `button.<ac>_cancel_on_timer` | Cancels the on timer and keeps the off timer. |
+
+In an automation, use the `time.set_value` action, for example `time: "23:00:00"`. A timer set in
+the MirAIe app shows up here too.
+
+Under the hood this is the `actm` command on the device's MQTT `/control` topic:
+`{"actm": [secondsUntilOff, secondsUntilOn]}`, with `-1` for no timer. The AC reports the timers in
+its status as Unix times. miraie-ac doesn't handle `actm`, so `timers.py` reads it from the raw status
+and publishes the command itself.
+
 ## Caveats
 
 NOTE: The primary functions of the integration (reading / writing the AC state) use ```cloud_push```, while the energy consumption sensor entities are updated using ```cloud_polling```.
